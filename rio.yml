@@ -1,0 +1,28 @@
+schemaVersion: 2.0
+
+pipelines:
+  - branchName: main
+    machine:
+      baseImage: docker.apple.com/aiml-jupyter/jupyter-build:latest
+    build:
+      template: freestyle:v4:publish
+      steps:
+        - make dist
+        # Build EG image
+        - mkdir -p etc/build/docker/enterprise-gateway
+        - cp -r etc/docker/enterprise-gateway/* dist/jupyter_enterprise_gateway_kernel_image_files* dist/jupyter_enterprise_gateway_kernelspecs-* dist/jupyter_enterprise_gateway*.whl etc/build/docker/enterprise-gateway
+        - ls -la etc/build/docker/enterprise-gateway
+        # Build Python kernel image
+        - mkdir -p etc/build/docker/kernel-py
+        - cp -r etc/docker/enterprise-gateway/* dist/jupyter_enterprise_gateway_kernel_image_files* dist/jupyter_enterprise_gateway_kernelspecs-* dist/jupyter_enterprise_gateway*.whl etc/build/docker/kernel-py
+        - ls -la etc/build/docker/kernel-py
+    package:
+      version: "dev"
+      dockerfile:
+        - dockerfilePath: etc/build/docker/enterprise-gateway/Dockerfile
+          context: etc/build/docker/enterprise-gateway/
+          env:
+            SPARK_VERSION: 3.2.2
+          perApplication: false
+          publish:
+            - repo: docker.apple.com/aiml-jupyter/enterprise-gateway
