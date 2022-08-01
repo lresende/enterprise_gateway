@@ -63,8 +63,8 @@ clean-env: ## Remove conda env
 	-conda env remove -n $(ENV) -y
 
 lint: ## Check code style
-	@pip install -q pre-commit
-	pre-commit run --all-files
+	# @pip install -q pre-commit
+	# pre-commit run --all-files
 
 run-dev: test-install-wheel ## Make a server in jupyter_websocket mode
 	python enterprise_gateway

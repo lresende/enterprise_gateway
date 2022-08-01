@@ -12,10 +12,12 @@ pipelines:
         - mkdir -p etc/build/docker/enterprise-gateway
         - cp -r etc/docker/enterprise-gateway/* dist/jupyter_enterprise_gateway_kernel_image_files* dist/jupyter_enterprise_gateway_kernelspecs-* dist/jupyter_enterprise_gateway*.whl etc/build/docker/enterprise-gateway
         - ls -la etc/build/docker/enterprise-gateway
+        - cat etc/build/docker/enterprise-gateway/Dockerfile
         # Build Python kernel image
         - mkdir -p etc/build/docker/kernel-py
         - cp -r etc/docker/enterprise-gateway/* dist/jupyter_enterprise_gateway_kernel_image_files* dist/jupyter_enterprise_gateway_kernelspecs-* dist/jupyter_enterprise_gateway*.whl etc/build/docker/kernel-py
         - ls -la etc/build/docker/kernel-py
+        - cat etc/build/docker/kernel-py/Dockerfile
     package:
       version: "dev"
       dockerfile:
