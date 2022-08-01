@@ -26,3 +26,8 @@ pipelines:
           perApplication: false
           publish:
             - repo: docker.apple.com/aiml-jupyter/enterprise-gateway
+        - dockerfilePath: etc/build/docker/kernel-py/Dockerfile
+          context: etc/build/docker/kernel-py/
+          perApplication: false
+          publish:
+            - repo: docker.apple.com/aiml-jupyter/kernel-py
