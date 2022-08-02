@@ -8,11 +8,21 @@ pipelines:
     build:
       template: freestyle:v4:publish
       steps:
+        - 'sed -i "s/version: \(.*\)$/version: \1+${RIO_BUILD_NUMBER}/" etc/kubernetes/helm/enterprise-gateway/Chart.yaml'
+        - cat etc/kubernetes/helm/enterprise-gateway/Chart.yaml
         - make dist
+        - ls -la dist
         # Build EG image
         - mkdir -p etc/build/docker/enterprise-gateway
         - cp -r etc/docker/enterprise-gateway/* dist/jupyter_enterprise_gateway_kernel_image_files* dist/jupyter_enterprise_gateway_kernelspecs-* dist/jupyter_enterprise_gateway*.whl etc/build/docker/enterprise-gateway
         - ls -la etc/build/docker/enterprise-gateway
+        # Build Python kernel image
+        - mkdir -p etc/build/docker/kernel-py
+        - cp -r etc/docker/kernel-py/* dist/jupyter_enterprise_gateway_kernel_image_files* dist/jupyter_enterprise_gateway_kernelspecs-* dist/jupyter_enterprise_gateway*.whl etc/build/docker/kernel-py
+        - ls -la etc/build/docker/kernel-py
+        # Helm
+        - ci stage-lib "dist/enterprise-gateway-3.0.0+${RIO_BUILD_NUMBER}.tgz"
+
     package:
       version: "dev"
       dockerfile:
@@ -24,18 +34,6 @@ pipelines:
           publish:
             - repo: docker.apple.com/aiml-jupyter/enterprise-gateway
 
-  - name: publish-kernel-py-image
-    branchName: main
-    machine:
-      baseImage: docker.apple.com/aiml-jupyter/jupyter-build:latest
-    build:
-      template: freestyle:v4:publish
-      steps:
-        - make dist
-        # Build Python kernel image
-        - mkdir -p etc/build/docker/kernel-py
-        - cp -r etc/docker/kernel-py/* dist/jupyter_enterprise_gateway_kernel_image_files* dist/jupyter_enterprise_gateway_kernelspecs-* dist/jupyter_enterprise_gateway*.whl etc/build/docker/kernel-py
-        - ls -la etc/build/docker/kernel-py
     package:
       version: "dev"
       dockerfile:
@@ -45,22 +43,7 @@ pipelines:
           publish:
             - repo: docker.apple.com/aiml-jupyter/kernel-py
 
-  - name: publish-enterprise-gateway-helm
-    branchName: main
-    machine:
-      baseImage: docker.apple.com/aiml-jupyter/jupyter-build:latest
-      env:
-        HELM_REPO: 'apple-aiml-jupyter'
-        RIO_BUILD_COUNTER: .#{}
-    build:
-      template: freestyle:v4:publish
-      steps:
-        - 'sed -i "s/version: \(.*\)$/version: \1+f${RIO_BUILD_NUMBER}/" etc/kubernetes/helm/enterprise-gateway/Chart.yaml'
-        - cat etc/kubernetes/helm/enterprise-gateway/Chart.yaml
-        - make dist
-        - ls -la dist
-        - ci stage-lib dist/enterprise-gateway-3.0.0.tgz
     package:
       freeform:
         - publish:
-            - repo: apple-helm-release-local
+            - repo: apple-helm-release-local/apple-aiml-jupyter/
