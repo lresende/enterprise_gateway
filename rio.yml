@@ -44,3 +44,23 @@ pipelines:
           perApplication: false
           publish:
             - repo: docker.apple.com/aiml-jupyter/kernel-py
+
+  - name: publish-enterprise-gateway-helm
+    branchName: main
+    machine:
+      baseImage: docker.apple.com/aiml-jupyter/jupyter-build:latest
+      env:
+        HELM_REPO: 'apple-aiml-jupyter'
+        RIO_BUILD_COUNTER: .#{}
+    build:
+      template: freestyle:v4:publish
+      steps:
+        - 'sed -i "s/version: \(.*\)$/version: \1+f${RIO_BUILD_NUMBER}/" etc/kubernetes/helm/enterprise-gateway/Chart.yaml'
+        - cat etc/kubernetes/helm/enterprise-gateway/Chart.yaml
+        - make dist
+        - ls -la dist
+        - ci stage-lib dist/enterprise-gateway-3.0.0.tgz
+    package:
+      freeform:
+        - publish:
+            - repo: apple-helm-release-local
