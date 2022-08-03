@@ -45,6 +45,24 @@ pipelines:
           publish:
             - repo: docker.apple.com/aiml-jupyter/kernel-py
 
+  - name: publish-kernel-image-puller-image
+    branchName: main
+    machine:
+      baseImage: docker.apple.com/aiml-jupyter/jupyter-build:latest
+    build:
+      template: freestyle:v4:publish
+      steps:
+        - make dist
+    package:
+      version: "dev"
+      dockerfile:
+        - dockerfilePath: etc/docker/kernel-image-puller/Dockerfile
+          context: etc/docker/kernel-image-puller/
+          perApplication: false
+          publish:
+            - repo: docker.apple.com/aiml-jupyter/kernel-image-puller
+
+
   - name: publish-enterprise-gateway-helm
     branchName: main
     machine:
